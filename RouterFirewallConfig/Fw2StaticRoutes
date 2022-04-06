@@ -1,0 +1,6 @@
+#!/bin/sh
+route add -net 30.0.5.0 netmask 255.255.255.0 gw 20.0.0.10
+route add -net 20.0.1.0 netmask 255.255.255.0 gw 20.0.0.10
+route add -net 20.0.2.0 netmask 255.255.255.0 gw 20.0.0.10
+route add -net 10.0.0.0 netmask 255.255.255.0 gw 20.0.0.10
+route add -net 10.0.1.0 netmask 255.255.255.0 gw 20.0.0.10

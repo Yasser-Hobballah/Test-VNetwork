@@ -1,0 +1,4 @@
+#!/bin/bash
+docker build -t router_firewall ./router_firewall_build
+docker build -t endpoint ./endpoints_build
+docker-compose up

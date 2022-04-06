@@ -1,0 +1,8 @@
+#!/bin/bash
+if [[ "$(docker images -q router_firewall 2> /dev/null)" == "" ]]; then # Check if image is already build
+docker build -t router_firewall ./router_firewall_build
+fi
+if [[ "$(docker images -q endpoint 2> /dev/null)" == "" ]]; then # Check if endpoint image is already build
+docker build -t endpoint ./endpoints_build
+fi
+docker-compose up

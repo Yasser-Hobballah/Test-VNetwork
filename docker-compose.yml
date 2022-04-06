@@ -1,0 +1,197 @@
+version: '3.8'
+
+services:
+  employee1:
+    container_name: employee1
+    hostname: employee1
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.0.2.5 && tail -F anything"
+    networks:
+      internal:
+          ipv4_address: 10.0.2.1
+  employee2:
+    container_name: employee2
+    hostname: employee2
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.0.2.5 && tail -F anything"
+    networks:
+      internal:
+          ipv4_address: 10.0.2.2
+  employee3:
+    container_name: employee3
+    hostname: employee3
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.0.2.5 && tail -F anything"
+    networks:
+      internal:
+          ipv4_address: 10.0.2.3
+  directoryserver:
+    container_name: directoryserver
+    hostname: directoryserver
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.0.2.5 && tail -F anything"
+    networks:
+      internal:
+          ipv4_address: 10.0.2.4
+  firewall2:
+    container_name: firewall2
+    hostname: firewall2
+    image: router_firewall
+    cap_add:
+     - NET_ADMIN
+    volumes:
+      - ./RouterFirewallConfig:/mnt:ro
+    command: sh -c "/mnt/Fw2StaticRoutes  && /mnt/iptablesTestCases/TC1/iptablesFirewall_TC1-In_2.sh && tail -F anything"
+    networks:
+      internal:
+          ipv4_address: 10.0.2.5
+      firewall2-router1:
+          ipv4_address: 20.0.0.9
+  router1:
+    container_name: router1
+    hostname: router1
+    image: router_firewall
+    cap_add:
+     - NET_ADMIN
+    volumes:
+      - ./RouterFirewallConfig:/mnt:ro
+    command: sh -c "/mnt/R1StaticRoutes && tail -F anything"
+    networks:
+      firewall2-router1:
+          ipv4_address: 20.0.0.10
+      router1-servers:
+          ipv4_address: 30.0.5.254
+      firewall1-router1:
+          ipv4_address: 20.0.1.9
+  emailserver:
+    container_name: emailserver
+    hostname: emailserver
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 30.0.5.254 && tail -F anything"
+    networks:
+      router1-servers:
+          ipv4_address: 30.0.5.2
+  webserver:
+    container_name: webserver
+    hostname: webserver
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 30.0.5.254 && tail -F anything"
+    networks:
+      router1-servers:
+          ipv4_address: 30.0.5.1
+  firewall1:
+    container_name: firewall1
+    hostname: firewall1
+    image: router_firewall
+    cap_add:
+     - NET_ADMIN
+    volumes:
+      - ./RouterFirewallConfig:/mnt:ro
+    command: sh -c "/mnt/Fw1StaticRoutes && /mnt/iptablesTestCases/TC1/iptablesFirewall_TC1-Ex_1.sh && tail -F anything"
+    networks:
+      router2-firewall1:
+          ipv4_address: 20.0.2.9
+      firewall1-router1:
+          ipv4_address: 20.0.1.10
+  router2:
+    container_name: router2
+    hostname: router2
+    image: router_firewall
+    cap_add:
+     - NET_ADMIN
+    volumes:
+      - ./RouterFirewallConfig:/mnt:ro
+    command: sh -c "/mnt/R2StaticRoutes && tail -F anything"
+    networks:
+      router2-firewall1:
+          ipv4_address: 20.0.2.10
+      webclient1-router2:
+          ipv4_address: 10.0.0.254
+      webclient2-router2:
+          ipv4_address: 10.0.1.254
+  webclient1:
+    container_name: webclient1
+    hostname: webclient1
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.0.0.254 && tail -F anything"
+    networks:
+      webclient1-router2:
+          ipv4_address: 10.0.0.1
+  webclient2:
+    container_name: webclient2
+    hostname: webclient2
+    image: endpoint
+    cap_add:
+     - NET_ADMIN
+    command: sh -c "route del default && route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.0.1.254 && tail -F anything"
+    networks:
+      webclient2-router2:
+          ipv4_address: 10.0.1.1
+networks:
+    internal:
+      name: internal
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 10.0.2.0/24
+            gateway: 10.0.2.100
+    firewall2-router1:
+      name: firewall2-router1
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 20.0.0.0/24
+    router1-servers:
+      name: router1-servers
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 30.0.5.0/24
+            gateway: 30.0.5.100
+    firewall1-router1:
+      name: firewall1-router1
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 20.0.1.0/24
+    router2-firewall1:
+      name: router2-firewall1
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 20.0.2.0/24
+    webclient1-router2:
+      name: webclient1-router2
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 10.0.0.0/24
+            gateway: 10.0.0.100
+    webclient2-router2:
+      name: webclient2-router2
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: 10.0.1.0/24
+            gateway: 10.0.1.100
