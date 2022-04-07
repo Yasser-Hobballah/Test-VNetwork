@@ -1,4 +1,11 @@
 #!/bin/bash
 docker build -t router_firewall ./router_firewall_build
 docker build -t endpoint ./endpoints_build
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then # Linux OS 
+sudo chmod -R 755 ./RouterFirewallConfig # Give correct permissions to Scripts to be mounted/executed
+elif [[ "$OSTYPE" == "darwin"* ]]; then  # Mac OSX
+sudo chmod -R 755 ./RouterFirewallConfig
+#elif [[ "$OSTYPE" == "msys" ]]; then  # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+#sudo chmod -R 755 ./RouterFirewallConfig
+fi
 docker-compose up
